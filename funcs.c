@@ -5,6 +5,26 @@
 
 #define clear() printf("\033[H\033[J")
 
+int checkCodigoDuplicado(char codigo[10])
+{
+	FILE* file = fopen("filmes_data.txt", "r");
+    char line[120];
+    char * match;
+
+	while (fgets(line, sizeof(line), file)) 
+	{
+		match = strtok(line, ";");
+
+		if (strcmp(codigo, match) == 0)
+		{
+			fclose(file);
+			return 1;
+		}
+	}
+	fclose(file);
+    return 0;
+}
+
 void cadastrarFilme()
 {
 	clear();
@@ -202,4 +222,5 @@ void gerarRelatorio() //pdf
 {
 	
 }
+
 
