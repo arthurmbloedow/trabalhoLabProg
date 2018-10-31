@@ -4,7 +4,7 @@
 
 #define clear() printf("\033[H\033[J")
 
-void main() //fflush(stdin);
+void main()
 {
 	clear();
 	printf("- Sistema de Gerenciamento de Locadora de Filmes -\n");
