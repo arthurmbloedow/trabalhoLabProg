@@ -7,13 +7,55 @@
 #define MULTA_DIAS 3 //quantos dias ate receber multa
 #define PRECO_PADRAO 5 //5 pilas
 
-/*
-void cadastrarCliente(); {}
-void editarCliente(); {}
-void procurarCliente(); {}
-void gerarRelatorioCliente(); {}
-void listarClientes(); {}
-*/
+
+void cadastrarCliente() {}
+void editarCliente() {}
+void procurarCliente() {}
+void gerarRelatorioCliente() {}
+void listarClientes() {}
+
+char * getClientName(char codigo[10])
+{
+	FILE* file = fopen("clientes_data.txt", "r");
+    char line[120];
+    char * match;
+
+	while (fgets(line, sizeof(line), file)) 
+	{
+		match = strtok(line, ";");
+
+		if (strcmp(codigo, match) == 0)
+		{
+			match = strtok(NULL, ";");
+			strtok(match, "\n");
+			fclose(file);
+			return match;
+		}
+	}
+	fclose(file);
+
+	return match;
+}
+
+int checkCodigoDuplicadoCliente(char codigo[10])
+{
+	FILE* file = fopen("clientes_data.txt", "r");
+    char line[120];
+    char * match;
+
+	while (fgets(line, sizeof(line), file)) 
+	{
+		match = strtok(line, ";");
+
+		if (strcmp(codigo, match) == 0)
+		{
+			fclose(file);
+			return 1;
+		}
+	}
+	fclose(file);
+    return 0;
+}
 
 int checkCodigoDuplicado(char codigo[10])
 {
@@ -82,11 +124,71 @@ void cadastrarFilme()
 		strcat(nome, ";true;");
 		strcat(nome, sdias);
 
+		printf("Associar um cliente ja existente[1] ou cadastrar um novo[2]? Digite 1 ou 2: ");
+		int client = 0;
+		scanf("%d", &client);
+
+		if (client == 1)
+		{
+			printf("Digite o codigo do cliente: ");
+			char codigoCliente[30];
+			fgetc(stdin);
+			fgets(codigoCliente, sizeof(codigoCliente), stdin);
+			strtok(codigoCliente, "\n");
+
+			while (checkCodigoDuplicadoCliente(codigoCliente) == 0)
+			{
+				printf("Codigo de cliente nao encontrado! Digite o codigo do cliente: ");
+				fgets(codigoCliente, sizeof(codigoCliente), stdin);
+				strtok(codigoCliente, "\n");
+
+				FILE* file = fopen("clientes_data.txt", "r");
+			    char line[120];
+			    char * match;
+			}
+			strcat(nome, codigoCliente);
+
+		}
+		if (client == 2)
+		{
+			printf("Digite o nome completo do cliente: ");
+			char nomeCliente[100];
+			fgetc(stdin);
+			fgets(nomeCliente, sizeof(nomeCliente), stdin);
+			strtok(nomeCliente, "\n");
+
+			printf("Digite o codigo do cliente: ");
+			char codigoCliente[30];
+			fgets(codigoCliente, sizeof(codigoCliente), stdin);
+			strtok(codigoCliente, "\n");
+
+			while (checkCodigoDuplicadoCliente(codigoCliente) == 1)
+			{
+				printf("Codigo de cliente ja existente! Digite o codigo do cliente: ");
+				fgets(codigoCliente, sizeof(codigoCliente), stdin);
+				strtok(codigoCliente, "\n");
+			}
+			strcat(nome, codigoCliente);
+
+			char print[200] = "";
+			strcpy(print, codigoCliente);
+			strcat(print, ";");
+			strcat(print, nomeCliente);
+
+			FILE *fptr;
+			fptr = fopen("clientes_data.txt","a+");
+			fprintf(fptr,"%s", print);
+			fclose(fptr);
+		}
+
+
+		/*
 		char nomeCliente[30];
 		printf("Qual cliente locou o filme? ");
 		fgetc(stdin);
 		fgets(nomeCliente, sizeof(nomeCliente), stdin);
 		strcat(nome, nomeCliente);
+		*/
 	}
 	else
 		strcat(nome, ";false;0;no_client\n");
@@ -117,7 +219,7 @@ void editarFilme()
     char old_name[60];
     char old_status[8];
     char old_days[3];
-    char old_client[30];
+    char old_client[10];
 
 	int found = 0;
 	int where = 0;
@@ -160,7 +262,7 @@ void editarFilme()
 				strcat(print, " dia(s) por ");
 				match = strtok(NULL, ";");
 				strtok(match, "\n");
-				strcat(print, match);
+				strcat(print, getClientName(match));
 				if (multa > MULTA_DIAS)
 				{
 					multa = (multa - MULTA_DIAS) * PRECO_PADRAO;
@@ -211,7 +313,7 @@ void editarFilme()
 					strcat(print, " dia(s) por ");
 					match = strtok(NULL, ";");
 					strtok(match, "\n");
-					strcat(print, match);
+					strcat(print, getClientName(match));
 					if (multa > MULTA_DIAS)
 					{
 						multa = (multa - MULTA_DIAS) * PRECO_PADRAO;
@@ -342,7 +444,65 @@ void editarFilme()
 				else if (y==3)
 				{
 					change++;
-					printf("\nDigite o nome do cliente para o qual deseja alterar: ");
+
+					printf("\nAssociar um cliente ja existente[1] ou cadastrar um novo[2]? Digite 1 ou 2: ");
+					int client = 0;
+					scanf("%d", &client);
+
+					if (client == 1)
+					{
+						printf("Digite o codigo do cliente: ");
+						char codigoCliente[30];
+						fgetc(stdin);
+						fgets(codigoCliente, sizeof(codigoCliente), stdin);
+						strtok(codigoCliente, "\n");
+
+						while (checkCodigoDuplicadoCliente(codigoCliente) == 0)
+						{
+							printf("Codigo de cliente nao encontrado! Digite o codigo do cliente: ");
+							fgets(codigoCliente, sizeof(codigoCliente), stdin);
+							strtok(codigoCliente, "\n");
+
+							FILE* file = fopen("clientes_data.txt", "r");
+						    char line[120];
+						    char * match;
+						}
+						strcpy(new_client, codigoCliente);
+
+					}
+					if (client == 2)
+					{
+						printf("Digite o nome completo do cliente: ");
+						char nomeCliente[100];
+						fgetc(stdin);
+						fgets(nomeCliente, sizeof(nomeCliente), stdin);
+						strtok(nomeCliente, "\n");
+
+						printf("Digite o codigo do cliente: ");
+						char codigoCliente[30];
+						fgets(codigoCliente, sizeof(codigoCliente), stdin);
+						strtok(codigoCliente, "\n");
+
+						while (checkCodigoDuplicadoCliente(codigoCliente) == 1)
+						{
+							printf("Codigo de cliente ja existente! Digite o codigo do cliente: ");
+							fgets(codigoCliente, sizeof(codigoCliente), stdin);
+							strtok(codigoCliente, "\n");
+						}
+						strcpy(new_client, codigoCliente);
+
+						char print[200] = "";
+						strcpy(print, codigoCliente);
+						strcat(print, ";");
+						strcat(print, nomeCliente);
+
+						FILE *fptr;
+						fptr = fopen("clientes_data.txt","a+");
+						fprintf(fptr,"%s", print);
+						fclose(fptr);
+					}
+
+					/*printf("\nDigite o codigo do cliente para o qual deseja alterar: ");
 					fgetc(stdin);
 					fgets(new_client, sizeof(new_client), stdin);
 					strtok(new_client, "\n");
@@ -352,7 +512,7 @@ void editarFilme()
 						printf("Nome do cliente ao antigo! Digite um NOVO nome: ");
 						fgets(new_client, sizeof(new_client), stdin);
 						strtok(new_client, "\n");
-					}
+					}*/
 					printf("\nAlteracao feita com sucesso!");
 				}
 			}
@@ -459,7 +619,7 @@ void procurarFilme()
 				strcat(print, " dia(s) por ");
 				match = strtok(NULL, ";");
 				strtok(match, "\n");
-				strcat(print, match);
+				strcat(print, getClientName(match));
 				if (multa > MULTA_DIAS)
 				{
 					multa = (multa - MULTA_DIAS) * PRECO_PADRAO;
@@ -501,7 +661,7 @@ void procurarFilme()
 					strcat(print, " dia(s) por ");
 					match = strtok(NULL, ";");
 					strtok(match, "\n");
-					strcat(print, match);
+					strcat(print, getClientName(match));
 					if (multa > MULTA_DIAS)
 					{
 						multa = (multa - MULTA_DIAS) * PRECO_PADRAO;
@@ -567,7 +727,8 @@ void listarFilmes()
 			strcat(print, " dia(s) por ");
 			str = strtok(NULL, ";");
 			strtok(str, "\n");
-			strcat(print, str);
+			//char * clientNome = getClientName(str);
+			strcat(print, getClientName(str));
 			if (multa > MULTA_DIAS)
 			{
 				multa = (multa - MULTA_DIAS) * PRECO_PADRAO;

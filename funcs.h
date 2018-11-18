@@ -9,10 +9,9 @@ void gerarRelatorio(); //pdf
 void listarFilmes();
 int checkCodigoDuplicado();
 
-/*
 void cadastrarCliente();
 void editarCliente();
 void procurarCliente();
 void gerarRelatorioCliente(); //pdf
 void listarClientes();
-*/
+int checkCodigoDuplicadoCliente();
