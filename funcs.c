@@ -115,7 +115,301 @@ void cadastrarCliente()
 	sleep(1);
 }
 
-void editarCliente() {}
+void editarCliente()
+{
+	clear();
+	char pesquisa[60];
+	printf("Digite o nome/codigo do cliente que quer editar: ");
+	__fpurge(stdin);
+	fgets(pesquisa, sizeof(pesquisa), stdin);
+	strtok(pesquisa, "\n");	
+
+	FILE* file = fopen("clientes_data.txt", "r");
+    char line[120];
+
+    char old_code[10];
+    char old_name[60];
+    char old_email[30];
+
+	int found = 0;
+	int where = 0;
+
+	printf("\n");
+	while (fgets(line, sizeof(line), file)) {
+		
+		if (found==0)
+    		where++;
+
+		char * match;
+		match = strtok(line, ";");
+		char * code = match;
+
+		if (strcmp(pesquisa, match) == 0) //||
+		{
+			found++;
+			char print[300] = "";
+
+			strcat(print, "[");
+			strcat(print, match);
+			strcpy(old_code, match);
+			strcat(print, "] ");
+			match = strtok(NULL, ";");
+			strcat(print, match); //nome
+			strcpy(old_name, match);
+			match = strtok(NULL, ";");
+			strtok(match, "\n");
+			strcat(print, " (");
+			strcat(print, match);
+			strcpy(old_email, match);
+			strcat(print, ") ");
+
+			//checar se o cliente tem algum fime locado e exibir aqui
+			int hasMovies = 0;
+			FILE* filef = fopen("filmes_data.txt", "r");
+		    char line[80];
+		    char movies[300] = "";
+		    char * match;
+
+			while (fgets(line, sizeof(line), filef)) 
+			{
+				match = strtok(line, ";"); //codigo
+				match = strtok(NULL, ";"); //nome
+				char movieName[30];
+				strcpy(movieName, match);
+				match = strtok(NULL, ";"); //status
+				match = strtok(NULL, ";"); //dias
+				char movieDays[3];
+				strcpy(movieDays, match);
+				match = strtok(NULL, ";"); //codigo cliente
+				strtok(match, "\n");
+
+				if (strcmp(code, match) == 0)
+				{
+					hasMovies++;;
+					strcat(movies, movieName);
+					strcat(movies, " por ");
+					int multa = atoi(movieDays);
+					strcat(movies, movieDays);
+					strcat(movies, " dia(s)");
+					if (multa > MULTA_DIAS)
+					{
+						multa = (multa - MULTA_DIAS) * PRECO_PADRAO;
+						strcat(print, ", com multa de R$ ");
+						char smulta[3];
+						sprintf(smulta, "%d", multa);
+						strcat(movies, smulta);
+					}
+					strcat(movies, "\n");
+				}
+			}
+			fclose(filef);
+			//--------------------------------------------------------
+
+			if (hasMovies > 0)
+			{
+				strcat(print, "tem ");
+				char howMany[3];
+				sprintf(howMany, "%d", hasMovies);
+				strcat(print, howMany);
+				strcat(print, " filme(s) locado(s): \n\n");
+				strcat(print, movies);
+			}
+
+			printf("%s \n", print);
+
+    	}
+
+    	if (found == 0)
+    	{
+    		match = strtok(NULL, ";");
+    		if (strcmp(pesquisa, match) == 0)
+    		{
+    			found++;
+				char print[300] = "";
+
+				strcat(print, "[");
+				strcat(print, code);
+				strcat(print, "] ");
+				strcat(print, match); //nome
+				match = strtok(NULL, ";");
+				strtok(match, "\n");
+				strcat(print, " (");
+				strcat(print, match);
+				strcat(print, ") ");
+
+				//checar se o cliente tem algum fime locado e exibir aqui
+				int hasMovies = 0;
+				FILE* filef = fopen("filmes_data.txt", "r");
+			    char line[80];
+			    char movies[300] = "";
+			    char * match;
+
+				while (fgets(line, sizeof(line), filef)) 
+				{
+					match = strtok(line, ";"); //codigo
+					match = strtok(NULL, ";"); //nome
+					char movieName[30];
+					strcpy(movieName, match);
+					match = strtok(NULL, ";"); //status
+					match = strtok(NULL, ";"); //dias
+					char movieDays[3];
+					strcpy(movieDays, match);
+					match = strtok(NULL, ";"); //codigo cliente
+					strtok(match, "\n");
+
+					if (strcmp(code, match) == 0)
+					{
+						hasMovies++;;
+						strcat(movies, movieName);
+						strcat(movies, " por ");
+						int multa = atoi(movieDays);
+						strcat(movies, movieDays);
+						strcat(movies, " dia(s)");
+						if (multa > MULTA_DIAS)
+						{
+							multa = (multa - MULTA_DIAS) * PRECO_PADRAO;
+							strcat(print, ", com multa de R$ ");
+							char smulta[3];
+							sprintf(smulta, "%d", multa);
+							strcat(movies, smulta);
+						}
+						strcat(movies, "\n");
+					}
+				}
+				fclose(filef);
+				//--------------------------------------------------------
+
+				if (hasMovies > 0)
+				{
+					strcat(print, "tem ");
+					char howMany[3];
+					sprintf(howMany, "%d", hasMovies);
+					strcat(print, howMany);
+					strcat(print, " filme(s) locado(s): \n\n");
+					strcat(print, movies);
+				}
+
+				printf("%s \n", print);
+    		}
+    	}
+    }
+
+	if (found == 0)
+	{
+		printf("A pesquisa \"%s\" nao encontrou resultados", pesquisa);
+	}
+	else
+	{
+		fclose(file);
+
+		char new_code[10]; 
+		strcpy(new_code, old_code);
+		char new_name[60]; 
+		strcpy(new_name, old_name);
+		char new_email[30]; 
+		strcpy(new_email, old_email);
+
+		int change = 0;
+
+		printf("\nO que quer editar? ");
+		printf("\n1 : Codigo");
+		printf("\n2 : Nome");
+		printf("\n3 : Email");
+		printf("\n0 : Voltar");
+		printf("\nInput: ");
+
+		int y = 0;
+		__fpurge(stdin);
+		scanf("%d", &y);
+
+		if (y==1)
+		{
+			change++;
+			printf("\nDigite o novo codigo: ");
+			__fpurge(stdin);
+			fgets(new_code, sizeof(new_code), stdin);
+			strtok(new_code, "\n");
+
+			while(checkCodigoDuplicadoCliente(new_code) || strcmp(new_code, old_code) == 0)
+			{
+				printf("Codigo duplicado! Digite um novo codigo: ");
+				__fpurge(stdin);
+				fgets(new_code, sizeof(new_code), stdin);
+				strtok(new_code, "\n");
+			}
+			printf("\nAlteracao feita com sucesso!");
+		}		
+		else if (y==2)
+		{
+			change++;
+			printf("\nDigite o novo nome: ");
+			__fpurge(stdin);
+			fgets(new_name, sizeof(new_name), stdin);
+			strtok(new_name, "\n");
+
+			while(strcmp(old_name, new_name) == 0)
+			{
+				printf("Nome igual ao antigo! Digite um NOVO nome: ");
+				__fpurge(stdin);
+				fgets(new_name, sizeof(new_name), stdin);
+				strtok(new_name, "\n");
+			}
+			printf("\nAlteracao feita com sucesso!");
+		}	
+		else if (y==3)
+		{
+			change++;
+			printf("\nDigite o novo email: ");
+			__fpurge(stdin);
+			fgets(new_email, sizeof(new_email), stdin);
+			strtok(new_email, "\n");
+
+			while(strcmp(old_email, new_email) == 0)
+			{
+				printf("Email igual ao antigo! Digite um NOVO email: ");
+				__fpurge(stdin);
+				fgets(new_email, sizeof(new_email), stdin);
+				strtok(new_email, "\n");
+			}
+			printf("\nAlteracao feita com sucesso!");
+		}
+
+		if (change > 0)
+		{
+			FILE* fileo = fopen("clientes_data.txt", "r");
+			FILE* filec = fopen("clientes_data_c.txt", "w");
+
+		    char line[120];
+
+			int x=1;
+
+			while (fgets(line, sizeof(line), fileo)) 
+			{
+				
+				if (x < where || x > where)
+					fprintf(filec,"%s", line);
+				else if (x == where)
+				{
+					fprintf(filec,"%s", new_code);
+					fprintf(filec,"%s", ";");
+					fprintf(filec,"%s", new_name);
+					fprintf(filec,"%s", ";");
+					fprintf(filec,"%s", new_email);
+					fprintf(filec,"%s", "\n");
+				}
+				x++;
+			}
+			fclose(fileo);
+			fclose(filec);
+
+			remove("clientes_data.txt");
+			rename("clientes_data_c.txt", "clientes_data.txt");
+		}	
+
+	}
+	printf("\n\nPressione Enter para continuar...");
+	fgetc(stdin);
+}
 
 void procurarCliente() 
 {
@@ -469,9 +763,9 @@ void listarClientes()
 		char howMany[3];
 		sprintf(howMany, "%d", hasMovies);
 		strcat(print, howMany);
-		strcat(print, " filme(s) locado(s).");
+		strcat(print, " filme(s) locado(s).\n");
 	}
-	printf("%s\n", print);
+	printf("%s ", print);
 	fclose(file);
 	printf("\n\nPressione Enter para continuar...");
 	__fpurge(stdin);
@@ -522,21 +816,26 @@ void cadastrarFilme()
 	fgets(nome, sizeof(nome), stdin);
 	strtok(nome, "\n");
 
-	char locado;
-	while (locado != 's' && locado != 'n')
+	char locado[3];
+	printf("O filme esta locado? [s/n]: ");
+	__fpurge(stdin);
+	fgets(locado, sizeof(locado), stdin);
+	strtok(locado, "\n");
+	while (strcmp(locado, "s") == 1 && strcmp(locado, "n") == 1)
 	{
 		printf("O filme esta locado? [s/n]: ");
 		__fpurge(stdin);
-		scanf("%c", &locado);
+		fgets(locado, sizeof(locado), stdin);
+		strtok(locado, "\n");
 	}
 
 	strcat(codigo, ";");
 	strcat(codigo, nome);  //n pergunte o pq
 	strcpy(nome, codigo);  
 
-	if (locado == 's')
+	if (strcmp(locado, "s") == 0)
 	{
-		int dias = 0;
+		int dias = -1;
 		char sdias[3];
 		while (dias < 0)
 		{
@@ -624,7 +923,8 @@ void cadastrarFilme()
 
 	FILE *fptr;
 	fptr = fopen("filmes_data.txt","a+");
-	fprintf(fptr,"%s\n", nome);
+	fprintf(fptr,"%s", nome);
+	fprintf(fptr,"\n");
 	fclose(fptr);
 
 	printf("\nFilme cadastrado com sucesso! \n");
