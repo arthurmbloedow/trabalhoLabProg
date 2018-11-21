@@ -1228,10 +1228,18 @@ void editarFilme()
 						}
 						strcpy(new_client, codigoCliente);
 
+						printf("Digite o email do cliente: ");
+						char emailCliente[50];
+						__fpurge(stdin);
+						fgets(emailCliente, sizeof(emailCliente), stdin);
+						strtok(emailCliente, "\n");
+
 						char print[200] = "";
 						strcpy(print, codigoCliente);
 						strcat(print, ";");
 						strcat(print, nomeCliente);
+						strcat(print, ";");
+						strcat(print, emailCliente);
 
 						FILE *fptr;
 						fptr = fopen("clientes_data.txt","a+");
@@ -1239,17 +1247,6 @@ void editarFilme()
 						fclose(fptr);
 					}
 
-					/*printf("\nDigite o codigo do cliente para o qual deseja alterar: ");
-					fgetc(stdin);
-					fgets(new_client, sizeof(new_client), stdin);
-					strtok(new_client, "\n");
-
-					while(strcmp(old_client, new_client) == 0)
-					{
-						printf("Nome do cliente ao antigo! Digite um NOVO nome: ");
-						fgets(new_client, sizeof(new_client), stdin);
-						strtok(new_client, "\n");
-					}*/
 					printf("\nAlteracao feita com sucesso!");
 				}
 			}
@@ -1262,10 +1259,74 @@ void editarFilme()
 				fgets(new_days, sizeof(new_days), stdin);
 				strtok(new_days, "\n");
 
-				printf("\nQual cliente locou o filme? ");
+				printf("\nAssociar um cliente ja existente[1] ou cadastrar um novo[2]? Digite 1 ou 2: ");
+				int client = 0;
 				__fpurge(stdin);
-				fgets(new_client, sizeof(new_client), stdin);
-				strtok(new_client, "\n");
+				scanf("%d", &client);
+
+				if (client == 1)
+				{
+					printf("Digite o codigo do cliente: ");
+					char codigoCliente[30];
+					__fpurge(stdin);
+					fgets(codigoCliente, sizeof(codigoCliente), stdin);
+					strtok(codigoCliente, "\n");
+
+					while (checkCodigoDuplicadoCliente(codigoCliente) == 0)
+					{
+						printf("Codigo de cliente nao encontrado! Digite o codigo do cliente: ");
+						__fpurge(stdin);
+						fgets(codigoCliente, sizeof(codigoCliente), stdin);
+						strtok(codigoCliente, "\n");
+
+						FILE* file = fopen("clientes_data.txt", "r");
+					    char line[120];
+					    char * match;
+					}
+					strcpy(new_client, codigoCliente);
+
+				}
+				if (client == 2)
+				{
+					printf("Digite o nome completo do cliente: ");
+					char nomeCliente[100];
+					__fpurge(stdin);
+					fgets(nomeCliente, sizeof(nomeCliente), stdin);
+					strtok(nomeCliente, "\n");
+
+					printf("Digite o codigo do cliente: ");
+					char codigoCliente[30];
+					__fpurge(stdin);
+					fgets(codigoCliente, sizeof(codigoCliente), stdin);
+					strtok(codigoCliente, "\n");
+
+					while (checkCodigoDuplicadoCliente(codigoCliente) == 1)
+					{
+						printf("Codigo de cliente ja existente! Digite o codigo do cliente: ");
+						__fpurge(stdin);
+						fgets(codigoCliente, sizeof(codigoCliente), stdin);
+						strtok(codigoCliente, "\n");
+					}
+					strcpy(new_client, codigoCliente);
+
+					printf("Digite o email do cliente: ");
+					char emailCliente[50];
+					__fpurge(stdin);
+					fgets(emailCliente, sizeof(emailCliente), stdin);
+					strtok(emailCliente, "\n");
+
+					char print[200] = "";
+					strcpy(print, codigoCliente);
+					strcat(print, ";");
+					strcat(print, nomeCliente);
+					strcat(print, ";");
+					strcat(print, emailCliente);
+
+					FILE *fptr;
+					fptr = fopen("clientes_data.txt","a+");
+					fprintf(fptr,"%s", print);
+					fclose(fptr);
+				}
 
 				printf("\nAlteracao feita com sucesso!");
 			}

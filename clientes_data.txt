@@ -2,3 +2,7 @@
 002;Spider Man;spiderman@email.com
 003;Thor;thor@email.com
 004;Hulk;hulk@email.com
+452;Tars;tars@email.com
+423421;Murph;murph@email.com
+3423;Captain America;cap@email.com
+696;Mochila de Crianca;email@email.com
