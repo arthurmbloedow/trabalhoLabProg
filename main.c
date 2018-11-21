@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <stdio_ext.h> //allows __fpurge(stdin); //clears buffer (valeu will)
 #include "funcs.h"
 
@@ -11,7 +13,7 @@ void main()
 	printf("- Sistema de Gerenciamento de Locadora de Filmes -\n");
 	printf("1 : Gerenciar Filmes \n");
 	printf("2 : Gerenciar Clientes \n");
-	printf("3 : Gerar Relatorio em PDF \n");
+	//printf("3 : Gerar Relatorio em PDF \n");
 	printf("0 : Sair\n");
 	printf("\nDigite o que deseja fazer: ");
 
@@ -44,7 +46,18 @@ void main()
 			listarFilmes();
 		else if (y==5)
 		{
-			
+			if (gerarRelatorioFilmes() == 0)
+			{
+				clear();
+				printf("PDF gerado com sucesso!\n");
+				sleep(1);
+			}
+			else
+			{
+				clear();
+				printf("Erro ao criar PDF!\n");
+				sleep(1);
+			}
 		}
 	}
 	else if (x==2)
@@ -72,7 +85,18 @@ void main()
 			listarClientes();
 		else if (y==5)
 		{
-			
+			if (gerarRelatorioCliente() == 0)
+			{
+				clear();
+				printf("PDF gerado com sucesso!\n");
+				sleep(1);
+			}
+			else
+			{
+				clear();
+				printf("Erro ao criar PDF!\n");
+				sleep(1);
+			}
 		}
 
 	}

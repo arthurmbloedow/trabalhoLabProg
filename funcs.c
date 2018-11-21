@@ -3,10 +3,29 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio_ext.h> //allows __fpurge(stdin); //clears buffer (valeu will)
+#include "hpdf.h" //pdf
+#include <setjmp.h> //sei la
 
-#define clear() printf("\033[H\033[J") //descobri depois que system(clear); funciona mas muita mao trocar
+#define clear() printf("\033[H\033[J") //descobri depois system(clear); mas agr ja fiz isso
 #define MULTA_DIAS 3 //quantos dias ate receber multa
 #define PRECO_PADRAO 5 //5 pilas
+
+
+jmp_buf env;
+
+#ifdef HPDF_DLL
+void  __stdcall
+#else
+void
+#endif
+error_handler (HPDF_STATUS   error_no,
+               HPDF_STATUS   detail_no,
+               void         *user_data)
+{
+    printf ("ERROR: error_no=%04X, detail_no=%u\n", (HPDF_UINT)error_no,
+                (HPDF_UINT)detail_no);
+    longjmp(env, 1);
+}
 
 char * getClientName(char codigo[10])
 {
@@ -276,7 +295,124 @@ void procurarCliente()
 	fgetc(stdin);
 }
 
-void gerarRelatorioCliente() {}
+int gerarRelatorioCliente()
+{
+	const char *page_title = "Sistema de Gerenciamento de Locadora de Filmes - Lista Clientes";
+    HPDF_Doc  pdf;
+    char fname[256];
+    HPDF_Page page;
+    HPDF_Font def_font;
+    HPDF_REAL tw;
+    HPDF_REAL height;
+    HPDF_REAL width;
+    HPDF_UINT i;
+
+    strcpy (fname, "relatorioClientes");
+    strcat (fname, ".pdf");
+
+    pdf = HPDF_New (error_handler, NULL);
+    if (!pdf) {
+        printf ("error: cannot create PdfDoc object\n");
+        return 1;
+    }
+
+    if (setjmp(env)) {
+        HPDF_Free (pdf);
+        return 1;
+    }
+
+    /* Add a new page object. */
+    page = HPDF_AddPage (pdf);
+
+    height = HPDF_Page_GetHeight (page);
+    width = HPDF_Page_GetWidth (page);
+
+    /* Print the title of the page (with positioning center). */
+    def_font = HPDF_GetFont (pdf, "Helvetica", NULL);
+    HPDF_Page_SetFontAndSize (page, def_font, 16);
+
+    tw = HPDF_Page_TextWidth (page, page_title);
+    HPDF_Page_BeginText (page);
+    HPDF_Page_TextOut (page, (width - tw) / 2, height - 30, page_title);
+    HPDF_Page_EndText (page);
+   
+    HPDF_Page_BeginText (page);
+    HPDF_Page_MoveTextPos (page, 60, height - 70);
+
+    //COMEÇA A PUTARIA AQUI
+    FILE* file = fopen("clientes_data.txt", "r");
+
+    char line[120];
+    char print[120] = "";
+
+	while (fgets(line, sizeof(line), file)) 
+	{
+		char * str;
+		char code[20];
+
+		str = strtok(line, ";"); //codigo
+		strcpy(code, str);
+		strcat(print, "[");
+		strcat(print, line);
+		strcat(print, "] ");
+		str = strtok(NULL, ";"); //nome
+		strcat(print, str);
+		strcat(print, " (");
+		str = strtok(NULL, ";"); //email
+		strtok(str, "\n");
+		strcat(print, str);
+		strcat(print, ")");
+
+		//checar se o cliente tem algum fime locado e exibir aqui
+		int hasMovies = 0;
+		FILE* filef = fopen("filmes_data.txt", "r");
+	    char lineM[80];
+	    char * movieMatch;
+		while (fgets(lineM, sizeof(lineM), filef)) 
+		{
+			movieMatch = strtok(lineM, ";"); //codigo
+			movieMatch = strtok(NULL, ";"); //nome
+			movieMatch = strtok(NULL, ";"); //status
+			movieMatch = strtok(NULL, ";"); //dias
+			movieMatch = strtok(NULL, ";"); //codigo cliente
+			strtok(movieMatch, "\n");
+
+			if (strcmp(code, movieMatch) == 0)
+			{
+				hasMovies++;
+			}
+		}
+		fclose(filef);
+		//--------------------------------------------------------
+
+		strcat(print, " tem ");
+		char howMany[3];
+		sprintf(howMany, "%d", hasMovies);
+		strcat(print, howMany);
+		strcat(print, " filme(s) locado(s).");
+
+		const char* samp_text = print;
+	    HPDF_Font font = HPDF_GetFont (pdf, "Helvetica", NULL);
+
+	    /* print a sample text. */
+	    HPDF_Page_SetFontAndSize (page, font, 12);
+	    HPDF_Page_ShowText (page, samp_text);
+	    HPDF_Page_MoveTextPos (page, 0, -14);
+
+	    strcpy(print, "");
+	}
+	fclose(file);
+	//TERMINa A PUTARIA AQUI
+
+    HPDF_Page_EndText (page);
+
+    HPDF_SaveToFile (pdf, fname);
+
+    /* clean up */
+    HPDF_Free (pdf);
+
+    return 0;
+}
 
 void listarClientes()
 {
@@ -1053,8 +1189,142 @@ void listarFilmes()
 	fgetc(stdin);
 }
 
-void gerarRelatorio() //pdf
+	/*font list
+		"Courier"
+		"Courier-Bold"
+		"Courier-Oblique"
+		"Courier-BoldOblique"
+		"Helvetica"
+		"Helvetica-Bold"
+		"Helvetica-Oblique"
+		"Helvetica-BoldOblique"
+		"Times-Roman"
+		"Times-Bold"
+		"Times-Italic"
+		"Times-BoldItalic"
+		"Symbol"
+		"ZapfDingbats"
+	*/
+
+int gerarRelatorio() //https://github.com/libharu/libharu/wiki/Usage-examples //Helvetica font
 {
-	
+    return 0;
 }
+
+int gerarRelatorioFilmes() //https://github.com/libharu/libharu/wiki/Usage-examples //Helvetica font
+{
+	const char *page_title = "Sistema de Gerenciamento de Locadora de Filmes - Lista Filmes";
+    HPDF_Doc  pdf;
+    char fname[256];
+    HPDF_Page page;
+    HPDF_Font def_font;
+    HPDF_REAL tw;
+    HPDF_REAL height;
+    HPDF_REAL width;
+    HPDF_UINT i;
+
+    strcpy (fname, "relatorioFilmes");
+    strcat (fname, ".pdf");
+
+    pdf = HPDF_New (error_handler, NULL);
+    if (!pdf) {
+        printf ("error: cannot create PdfDoc object\n");
+        return 1;
+    }
+
+    if (setjmp(env)) {
+        HPDF_Free (pdf);
+        return 1;
+    }
+
+    /* Add a new page object. */
+    page = HPDF_AddPage (pdf);
+
+    height = HPDF_Page_GetHeight (page);
+    width = HPDF_Page_GetWidth (page);
+
+    /* Print the title of the page (with positioning center). */
+    def_font = HPDF_GetFont (pdf, "Helvetica", NULL);
+    HPDF_Page_SetFontAndSize (page, def_font, 16);
+
+    tw = HPDF_Page_TextWidth (page, page_title);
+    HPDF_Page_BeginText (page);
+    HPDF_Page_TextOut (page, (width - tw) / 2, height - 30, page_title);
+    HPDF_Page_EndText (page);
+   
+    HPDF_Page_BeginText (page);
+    HPDF_Page_MoveTextPos (page, 60, height - 70);
+
+    //COMEÇA A PUTARIA AQUI
+	FILE* file = fopen("filmes_data.txt", "r");
+
+    char line[120];
+    char print[120] = "";
+
+	while (fgets(line, sizeof(line), file)) 
+	{
+		//int i = 0;
+		char * str;
+
+		str = strtok(line, ";"); //codigo
+		strcat(print, "[");
+		strcat(print, line);
+		strcat(print, "] ");
+
+		str = strtok(NULL, ";"); //nome
+		strcat(print, str);
+		strcat(print, " esta ");
+
+		str = strtok(NULL, ";"); //locado (true false)
+		if (strcmp(str, "true") == 0)
+		{
+			str = strtok(NULL, ";");
+			strcat(print, "locado ha ");
+			strcat(print, str);
+			int multa = atoi(str);
+			strcat(print, " dia(s) por ");
+			str = strtok(NULL, ";");
+			strtok(str, "\n");
+			//char * clientNome = getClientName(str);
+			strcat(print, getClientName(str));
+			if (multa > MULTA_DIAS)
+			{
+				multa = (multa - MULTA_DIAS) * PRECO_PADRAO;
+				strcat(print, ", com multa de R$ ");
+				char smulta[5];
+				sprintf(smulta, "%d", multa);
+				strcat(print, smulta);
+			}
+			strcat(print, ".");
+		}
+		else
+			strcat(print, "disponivel.");
+
+		const char* samp_text = print;
+	    HPDF_Font font = HPDF_GetFont (pdf, "Helvetica", NULL);
+
+	    /* print a sample text. */
+	    HPDF_Page_SetFontAndSize (page, font, 12);
+	    HPDF_Page_ShowText (page, samp_text);
+	    HPDF_Page_MoveTextPos (page, 0, -14);
+
+		//i = 0;
+		strcpy(print, "");
+
+
+    }
+    fclose(file);
+
+	//TERMINa A PUTARIA AQUI
+
+    HPDF_Page_EndText (page);
+
+    HPDF_SaveToFile (pdf, fname);
+
+    /* clean up */
+    HPDF_Free (pdf);
+
+    return 0;
+}
+
 

@@ -5,13 +5,14 @@
 void cadastrarFilme();
 void editarFilme();
 void procurarFilme();
-void gerarRelatorio(); //pdf
+int gerarRelatorio(); //pdf
+int gerarRelatorioFilmes();
 void listarFilmes();
 int checkCodigoDuplicado();
 
 void cadastrarCliente();
 void editarCliente();
 void procurarCliente();
-void gerarRelatorioCliente(); //pdf
+int gerarRelatorioCliente(); //pdf
 void listarClientes();
 int checkCodigoDuplicadoCliente();
